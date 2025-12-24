@@ -294,26 +294,26 @@ export class MailBuilder {
       <div class="email-container" style="${containerStyles}; transform: scale(${zoom / 100}); transform-origin: top center;">
         ${blocks.length === 0 ? this.renderEmptyState() : ''}
         ${blocks.map((block: Block, index: number) => this.renderBlockEditor(block, index, selectedBlockId)).join('')}
-        <div class="drop-zone drop-zone-end" data-index="${blocks.length}"></div>
       </div>
     `;
 
+    // Set canvas for drag-drop manager
+    this.dragDrop.setCanvas(canvas as HTMLElement);
     this.attachCanvasEventListeners(canvas as HTMLElement);
-    this.registerDropZones(canvas as HTMLElement);
   }
 
   private renderEmptyState(): string {
     return `
-      <div class="empty-state">
-        <div class="empty-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <div class="empty-drop-zone">
+        <div style="margin-bottom: 16px;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <line x1="12" y1="8" x2="12" y2="16"/>
             <line x1="8" y1="12" x2="16" y2="12"/>
           </svg>
         </div>
-        <h3>Start Building Your Email</h3>
-        <p>Drag blocks from the sidebar or click to add them</p>
+        <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #374151;">Start Building Your Email</h3>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">Drag blocks from the sidebar or click to add them</p>
       </div>
     `;
   }
@@ -325,17 +325,30 @@ export class MailBuilder {
     return `
       <div class="block-wrapper ${isSelected ? 'selected' : ''}" 
            data-block-id="${block.id}" 
-           data-block-index="${index}"
+           data-index="${index}"
            draggable="true">
-        <div class="drop-zone drop-zone-before" data-index="${index}"></div>
         <div class="block-content" style="${blockStyles}">
           ${this.renderBlockContent(block)}
         </div>
         <div class="block-toolbar">
-          <button class="block-action" data-action="move-up" title="Move Up">↑</button>
-          <button class="block-action" data-action="move-down" title="Move Down">↓</button>
-          <button class="block-action" data-action="duplicate" title="Duplicate">⧉</button>
-          <button class="block-action" data-action="delete" title="Delete">×</button>
+          <button class="block-toolbar-btn drag-handle" data-action="drag" title="Drag to reorder">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
+              <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
+              <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>
+            </svg>
+          </button>
+          <button class="block-toolbar-btn" data-action="duplicate" title="Duplicate">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </button>
+          <button class="block-toolbar-btn danger" data-action="delete" title="Delete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
         </div>
       </div>
     `;
@@ -424,11 +437,11 @@ export class MailBuilder {
         }
       });
 
-      wrapper.querySelectorAll('.block-action').forEach(btn => {
+      wrapper.querySelectorAll('.block-toolbar-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const action = (btn as HTMLElement).dataset.action;
-          if (blockId && action) {
+          if (blockId && action && action !== 'drag') {
             this.handleBlockAction(blockId, action);
           }
         });
@@ -451,21 +464,7 @@ export class MailBuilder {
     });
   }
 
-  private registerDropZones(canvas: HTMLElement): void {
-    this.dragDrop.clearDropZones();
-    
-    canvas.querySelectorAll('.drop-zone').forEach(zone => {
-      const index = parseInt((zone as HTMLElement).dataset.index || '0', 10);
-      const rect = zone.getBoundingClientRect();
-      
-      this.dragDrop.registerDropZone({
-        id: `drop-${index}`,
-        index,
-        rect,
-      });
-    });
-  }
-
+  
   private handleBlockAction(blockId: string, action: string): void {
     const store = useEditorStore.getState();
     
