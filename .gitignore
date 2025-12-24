@@ -17,3 +17,10 @@ playground-temp
 temp
 TODOs.md
 .eslintcache
+
+# Cypress
+cypress/videos
+cypress/screenshots
+cypress/reports/*.json
+!cypress/reports/*.html
+cypress/reports/videos
