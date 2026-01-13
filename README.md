@@ -1,8 +1,6 @@
 # MailBuilder
 
-A professional drag-and-drop email builder library built with TypeScript. Create beautiful, responsive emails with an intuitive visual editor similar to Mailchimp.
-
-![MailBuilder Demo](https://via.placeholder.com/800x400?text=MailBuilder+Demo)
+A professional drag-and-drop email builder library built with TypeScript. Create beautiful, responsive emails with an intuitive visual editor.
 
 ## ✨ Features
 
