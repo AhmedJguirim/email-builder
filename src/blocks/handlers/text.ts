@@ -1,4 +1,5 @@
 import type { Block, TextBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const textHandler: BlockHandler = {
@@ -11,10 +12,6 @@ export const textHandler: BlockHandler = {
   renderProperties(block: Block): string {
     if (block.type !== 'text') return '';
     return `
-      <div class="property-group">
-        <label>Placeholder Text</label>
-        <input type="text" id="text-placeholder" value="${(block as TextBlock).placeholder || ''}" />
-      </div>
     `;
   },
 
@@ -25,12 +22,14 @@ export const textHandler: BlockHandler = {
   ): void {
     if (block.type !== 'text') return;
 
-    const placeholderInput = properties.querySelector('#text-placeholder') as HTMLInputElement;
-    if (placeholderInput) {
-      placeholderInput.addEventListener('change', () => {
-        callbacks.updateBlock(block.id, { placeholder: placeholderInput.value } as Partial<Block>);
-        callbacks.renderCanvas();
-      });
-    }
+      addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+      addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+      addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+      addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+      addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
+      addStyleListener('fontSize', properties, block, callbacks,'#font-size');
+      addStyleListener('color', properties, block, callbacks,'#text-color');
+      addStyleListener('lineHeight', properties, block, callbacks,'#line-height');
+
   },
 };

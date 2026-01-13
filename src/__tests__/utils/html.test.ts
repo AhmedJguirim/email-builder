@@ -89,7 +89,7 @@ describe('HTML Utilities', () => {
   describe('createEmailWrapper', () => {
     it('should create complete email HTML document', () => {
       const result = createEmailWrapper(
-        '<tr><td>Email content</td></tr>',
+        '<tr><td style="border-collapse: collapse;">Email content</td></tr>',
         'background-color: #f5f5f5;',
         'background-color: #ffffff;',
         '600px'
@@ -104,7 +104,7 @@ describe('HTML Utilities', () => {
     });
 
     it('should include viewport meta tag', () => {
-      const result = createEmailWrapper('<tr><td>Test</td></tr>', '', '', '600px');
+      const result = createEmailWrapper('<tr><td style="border-collapse: collapse;">Test</td></tr>', '', '', '600px');
       expect(result).toContain('viewport');
     });
   });

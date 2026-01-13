@@ -53,11 +53,12 @@ export interface ButtonBlock extends BlockBase {
   link: string;
   buttonStyles: {
     backgroundColor: string;
+    textDecoration: string;
+    fontStyle: string;
     textColor: string;
     borderRadius: string;
     paddingX: string;
     paddingY: string;
-    fontSize: string;
     fontWeight: string;
     borderWidth: string;
     borderColor: string;

@@ -46,9 +46,9 @@ export function stripHtmlTags(html: string): string {
 
 export function wrapInTable(content: string, styles: string = ''): string {
   return `
-    <table border="0" cellpadding="0" cellspacing="0" width="100%"${styles ? ` style="${styles}"` : ''}>
+    <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" border="0" cellpadding="0" cellspacing="0" width="100%"${styles ? ` style="${styles}"` : ''}>
       <tr>
-        <td>
+        <td style="border-collapse: collapse;">
           ${content}
         </td>
       </tr>
@@ -77,31 +77,15 @@ export function createEmailWrapper(content: string, bodyStyles: string, containe
     </xml>
   </noscript>
   <![endif]-->
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased; }
-    img { border: 0; display: block; height: auto; line-height: 100%; max-width: 100%; text-decoration: none; }
-    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    td { border-collapse: collapse; }
-    a { color: inherit; text-decoration: underline; }
-    @media only screen and (max-width: 600px) {
-      .email-container { width: 100% !important; max-width: 100% !important; }
-      .stack-column, .stack-column-center { display: block !important; width: 100% !important; max-width: 100% !important; }
-      .stack-column-center { text-align: center !important; }
-      .mobile-center { text-align: center !important; }
-      .mobile-full-width { width: 100% !important; }
-      .mobile-padding { padding-left: 16px !important; padding-right: 16px !important; }
-    }
-  </style>
 </head>
-<body style="${bodyStyles}">
+<body style="${bodyStyles} box-sizing: border-box; width: 100%; word-break: break-word; -webkit-font-smoothing: antialiased;">
   <center style="width: 100%; background: inherit;">
     <!--[if mso | IE]>
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background: inherit;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background: inherit; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
     <tr>
-    <td>
+    <td style="border-collapse: collapse;">  
     <![endif]-->
-    <table class="email-container" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; ${containerStyles}; max-width: ${maxWidth};" width="${maxWidth.replace('px', '')}">
+    <table class="email-container" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; ${containerStyles}; max-width: ${maxWidth}; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="${maxWidth.replace('px', '')}">
       ${content}
     </table>
     <!--[if mso | IE]>

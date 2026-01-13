@@ -8,7 +8,7 @@ export const imageHandler: BlockHandler = {
     if (!img.src) {
       return `<div class="placeholder image-placeholder">Click to add image</div>`;
     }
-    const imgTag = `<img src="${img.src}" alt="${img.alt}" style="width: ${img.width || '100%'}; max-width: 100%; height: auto; display: block; margin: 0 auto;" />`;
+    const imgTag = `<img src="${img.src}" alt="${img.alt}" style="width: ${img.width || '100%'}; max-width: 100%; border: 0; line-height: 100%; height: auto; text-decoration: none; display: block; margin: 0 auto;" />`;
     return img.link ? `<a href="${img.link}">${imgTag}</a>` : imgTag;
   },
 

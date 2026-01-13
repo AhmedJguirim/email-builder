@@ -41,7 +41,6 @@ export const headingHandler: BlockHandler = {
     callbacks: BlockHandlerCallbacks
   ): void {
     if (block.type !== 'heading') return;
-    console.log(block.styles)
 
     const levelSelect = properties.querySelector('#heading-level') as HTMLSelectElement;
     if (levelSelect) {

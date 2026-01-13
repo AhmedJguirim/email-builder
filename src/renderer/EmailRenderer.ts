@@ -132,7 +132,7 @@ export class EmailRenderer {
     const css = stylesToCss(styles);
     return `
       <tr>
-        <td style="${css}">
+        <td style="border-collapse: collapse; ${css}">
           ${content}
         </td>
       </tr>
@@ -189,12 +189,12 @@ export class EmailRenderer {
       display: inline-block;
       background-color: ${buttonStyles.backgroundColor};
       color: ${buttonStyles.textColor};
-      font-size: ${buttonStyles.fontSize};
       font-weight: ${buttonStyles.fontWeight};
+      font-style: ${(buttonStyles as any).fontStyle || 'normal'};
       padding: ${buttonStyles.paddingY} ${buttonStyles.paddingX};
       border-radius: ${buttonStyles.borderRadius};
       border: ${buttonStyles.borderWidth} solid ${buttonStyles.borderColor};
-      text-decoration: none;
+      text-decoration: ${(buttonStyles as any).textDecoration || 'none'};
       text-align: center;
       ${buttonStyles.fullWidth ? 'width: 100%; box-sizing: border-box;' : ''}
     `.replace(/\s+/g, ' ').trim();
@@ -219,7 +219,7 @@ export class EmailRenderer {
   private renderSpacer(block: SpacerBlock): string {
     return `
       <tr>
-        <td style="height: ${block.height}; line-height: ${block.height}; font-size: 1px;">&nbsp;</td>
+        <td style="border-collapse: collapse; height: ${block.height}; line-height: ${block.height}; font-size: 1px;">&nbsp;</td>
       </tr>
     `.trim();
   }
@@ -235,8 +235,8 @@ export class EmailRenderer {
           .join('');
 
         return `
-          <td class="${block.stackOnMobile ? 'stack-column' : ''}" style="${columnStyles}">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          <td class="${block.stackOnMobile ? 'stack-column' : ''}" style="${columnStyles} border-collapse: collapse;">
+            <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" border="0" cellpadding="0" cellspacing="0" width="100%">
               ${childrenHtml}
             </table>
           </td>
@@ -246,12 +246,12 @@ export class EmailRenderer {
 
     return `
       <tr>
-        <td style="${containerStyles}">
+        <td style="${containerStyles} border-collapse: collapse;">
           <!--[if mso]>
-          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+          <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
           <tr>
           <![endif]-->
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
             <tr>
               ${columnsHtml}
             </tr>

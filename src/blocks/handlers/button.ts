@@ -1,4 +1,5 @@
 import type { Block, ButtonBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const buttonHandler: BlockHandler = {
@@ -13,8 +14,8 @@ export const buttonHandler: BlockHandler = {
         color: ${btn.buttonStyles.textColor};
         padding: ${btn.buttonStyles.paddingY} ${btn.buttonStyles.paddingX};
         border-radius: ${btn.buttonStyles.borderRadius};
-        text-decoration: none;
-        font-size: ${btn.buttonStyles.fontSize};
+        text-decoration: ${btn.buttonStyles.textDecoration || 'none'};
+        font-style: ${btn.buttonStyles.fontStyle || 'normal'};
         font-weight: ${btn.buttonStyles.fontWeight};
       ">${btn.text}</a>
     `;
@@ -41,6 +42,14 @@ export const buttonHandler: BlockHandler = {
         <input type="color" id="btn-text-color" value="${btn.buttonStyles.textColor}" />
       </div>
       <div class="property-group">
+        <label>Text Style</label>
+        <div>
+          <button type="button" id="btn-bold" class="btn-small">B</button>
+          <button type="button" id="btn-italic" class="btn-small">I</button>
+          <button type="button" id="btn-underline" class="btn-small">U</button>
+        </div>
+      </div>
+      <div class="property-group">
         <label>Border Radius</label>
         <input type="text" id="btn-radius" value="${btn.buttonStyles.borderRadius}" />
       </div>
@@ -58,6 +67,15 @@ export const buttonHandler: BlockHandler = {
   ): void {
     if (block.type !== 'button') return;
     const btn = block as ButtonBlock;
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
+    addStyleListener('fontSize', properties, block, callbacks,'#font-size');
+    addStyleListener('color', properties, block, callbacks,'#text-color');
+    addStyleListener('lineHeight', properties, block, callbacks,'#line-height');
 
     const handlers: Record<string, (value: string | boolean) => Partial<Block>> = {
       'btn-text': (v) => ({ text: v as string }),
@@ -78,5 +96,42 @@ export const buttonHandler: BlockHandler = {
         });
       }
     });
+
+    // Toggle style buttons
+    const boldBtn = properties.querySelector('#btn-bold') as HTMLButtonElement | null;
+    const italicBtn = properties.querySelector('#btn-italic') as HTMLButtonElement | null;
+    const underlineBtn = properties.querySelector('#btn-underline') as HTMLButtonElement | null;
+
+    if (boldBtn) {
+      boldBtn.addEventListener('click', () => {
+        const next = btn.buttonStyles.fontWeight === '700' ? '400' : '700';
+        btn.buttonStyles.fontWeight = next;
+        callbacks.updateBlock(block.id, { buttonStyles: { ...btn.buttonStyles, fontWeight: next } } as Partial<Block>);
+        callbacks.renderCanvas();
+        console.log(btn.buttonStyles);
+      });
+    }
+
+    if (italicBtn) {
+      italicBtn.addEventListener('click', () => {
+        const current = btn.buttonStyles.fontStyle || 'normal';
+        const next = current === 'italic' ? 'normal' : 'italic';
+        btn.buttonStyles.fontStyle = next;
+        callbacks.updateBlock(block.id, { buttonStyles: { ...btn.buttonStyles, fontStyle: next } } as Partial<Block>);
+        callbacks.renderCanvas();
+        console.log(btn.buttonStyles);
+      });
+    }
+
+    if (underlineBtn) {
+      underlineBtn.addEventListener('click', () => {
+        const current = btn.buttonStyles.textDecoration || 'none';
+        const next = current === 'underline' ? 'none' : 'underline';
+        btn.buttonStyles.textDecoration = next;
+        callbacks.updateBlock(block.id, { buttonStyles: { ...btn.buttonStyles, textDecoration: next } } as Partial<Block>);
+        callbacks.renderCanvas();
+        console.log(btn.buttonStyles);
+      });
+    }
   },
 };

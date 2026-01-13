@@ -374,7 +374,7 @@ Custom HTML content.
 import { createHtmlBlock } from '@mailbuilder/core';
 
 const html = createHtmlBlock({
-  content: '<table><tr><td>Custom HTML</td></tr></table>',
+  content: '<table><tr><td style="border-collapse: collapse;">Custom HTML</td></tr></table>',
 });
 ```
 
