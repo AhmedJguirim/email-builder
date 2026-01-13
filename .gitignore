@@ -21,6 +21,6 @@ TODOs.md
 # Cypress
 cypress/videos
 cypress/screenshots
+cypress/reports
 cypress/reports/*.json
-!cypress/reports/*.html
 cypress/reports/videos

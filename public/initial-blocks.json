@@ -1,0 +1,141 @@
+[
+  {
+    "id": "header_1",
+    "type": "header",
+    "preheaderText": "",
+    "showWebVersion": true,
+    "webVersionText": "View in browser",
+    "styles": {
+      "paddingTop": "10px",
+      "paddingBottom": "10px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px",
+      "fontSize": "12px",
+      "color": "#6b7280",
+      "textAlign": "center"
+    }
+  },
+  {
+    "id": "logo_1",
+    "type": "logo",
+    "src": "",
+    "alt": "Company Logo",
+    "width": "150px",
+    "alignment": "center",
+    "styles": {
+      "paddingTop": "30px",
+      "paddingBottom": "20px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px"
+    }
+  },
+  {
+    "id": "heading_1",
+    "type": "heading",
+    "content": "Welcome to Our Newsletter",
+    "level": 1,
+    "styles": {
+      "paddingTop": "20px",
+      "paddingBottom": "10px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px",
+      "fontSize": "28px",
+      "fontWeight": "700",
+      "color": "#111827",
+      "textAlign": "center"
+    }
+  },
+  {
+    "id": "text_1",
+    "type": "text",
+    "content": "<p>Hi {{ first_name }},</p><p>Thank you for subscribing to our newsletter. We're excited to have you on board!</p>",
+    "styles": {
+      "paddingTop": "10px",
+      "paddingBottom": "20px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px",
+      "fontSize": "16px",
+      "lineHeight": "1.6",
+      "color": "#4b5563"
+    }
+  },
+  {
+    "id": "button_1",
+    "type": "button",
+    "text": "Get Started",
+    "link": "#",
+    "buttonStyles": {
+      "backgroundColor": "#3b82f6",
+      "textColor": "#ffffff",
+      "borderRadius": "6px",
+      "paddingX": "32px",
+      "paddingY": "14px",
+      "fontSize": "16px",
+      "fontWeight": "600",
+      "borderWidth": "0",
+      "borderColor": "transparent",
+      "fullWidth": false
+    },
+    "styles": {
+      "paddingTop": "10px",
+      "paddingBottom": "30px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px",
+      "textAlign": "center"
+    }
+  },
+  {
+    "id": "divider_1",
+    "type": "divider",
+    "dividerStyles": {
+      "style": "solid",
+      "color": "#e5e7eb",
+      "thickness": "1px",
+      "width": "100%"
+    },
+    "styles": {
+      "paddingTop": "10px",
+      "paddingBottom": "10px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px"
+    }
+  },
+  {
+    "id": "social_1",
+    "type": "social",
+    "links": [
+      { "id": "fb_1", "platform": "facebook", "url": "#" },
+      { "id": "tw_1", "platform": "twitter", "url": "#" },
+      { "id": "ig_1", "platform": "instagram", "url": "#" },
+      { "id": "li_1", "platform": "linkedin", "url": "#" }
+    ],
+    "iconSize": "24px",
+    "iconStyle": "color",
+    "spacing": "12px",
+    "alignment": "center",
+    "styles": {
+      "paddingTop": "20px",
+      "paddingBottom": "20px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px"
+    }
+  },
+  {
+    "id": "footer_1",
+    "type": "footer",
+    "content": "© {{ current_year }} {{ company_name }}. All rights reserved.",
+    "showUnsubscribe": true,
+    "showAddress": true,
+    "address": "{{ company_address }}",
+    "styles": {
+      "paddingTop": "20px",
+      "paddingBottom": "30px",
+      "paddingLeft": "20px",
+      "paddingRight": "20px",
+      "fontSize": "12px",
+      "color": "#9ca3af",
+      "textAlign": "center",
+      "backgroundColor": "#f9fafb"
+    }
+  }
+]

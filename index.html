@@ -53,200 +53,90 @@
   <script type="module">
     import { createMailBuilder } from './src/index.ts';
     
-    // Sample initial blocks for demo
-    const initialBlocks = [
-      {
-        id: 'header_1',
-        type: 'header',
-        preheaderText: '',
-        showWebVersion: true,
-        webVersionText: 'View in browser',
-        styles: {
-          paddingTop: '10px',
-          paddingBottom: '10px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          fontSize: '12px',
-          color: '#6b7280',
-          textAlign: 'center',
+    // Load initial blocks from JSON file
+    async function loadInitialBlocks() {
+      try {
+        const response = await fetch('/initial-blocks.json');
+        if (!response.ok) {
+          console.warn('Could not load initial blocks, using empty array');
+          return [];
         }
-      },
-      {
-        id: 'logo_1',
-        type: 'logo',
-        src: '',
-        alt: 'Company Logo',
-        width: '150px',
-        alignment: 'center',
-        styles: {
-          paddingTop: '30px',
-          paddingBottom: '20px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-        }
-      },
-      {
-        id: 'heading_1',
-        type: 'heading',
-        content: 'Welcome to Our Newsletter',
-        level: 1,
-        styles: {
-          paddingTop: '20px',
-          paddingBottom: '10px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          fontSize: '28px',
-          fontWeight: '700',
-          color: '#111827',
-          textAlign: 'center',
-        }
-      },
-      {
-        id: 'text_1',
-        type: 'text',
-        content: '<p>Hi {{ first_name }},</p><p>Thank you for subscribing to our newsletter. We\'re excited to have you on board!</p>',
-        styles: {
-          paddingTop: '10px',
-          paddingBottom: '20px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          fontSize: '16px',
-          lineHeight: '1.6',
-          color: '#4b5563',
-        }
-      },
-      {
-        id: 'button_1',
-        type: 'button',
-        text: 'Get Started',
-        link: '#',
-        buttonStyles: {
-          backgroundColor: '#3b82f6',
-          textColor: '#ffffff',
-          borderRadius: '6px',
-          paddingX: '32px',
-          paddingY: '14px',
-          fontSize: '16px',
-          fontWeight: '600',
-          borderWidth: '0',
-          borderColor: 'transparent',
-          fullWidth: false,
-        },
-        styles: {
-          paddingTop: '10px',
-          paddingBottom: '30px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          textAlign: 'center',
-        }
-      },
-      {
-        id: 'divider_1',
-        type: 'divider',
-        dividerStyles: {
-          style: 'solid',
-          color: '#e5e7eb',
-          thickness: '1px',
-          width: '100%',
-        },
-        styles: {
-          paddingTop: '10px',
-          paddingBottom: '10px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-        }
-      },
-      {
-        id: 'social_1',
-        type: 'social',
-        links: [
-          { id: 'fb_1', platform: 'facebook', url: '#' },
-          { id: 'tw_1', platform: 'twitter', url: '#' },
-          { id: 'ig_1', platform: 'instagram', url: '#' },
-          { id: 'li_1', platform: 'linkedin', url: '#' },
-        ],
-        iconSize: '24px',
-        iconStyle: 'color',
-        spacing: '12px',
-        alignment: 'center',
-        styles: {
-          paddingTop: '20px',
-          paddingBottom: '20px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-        }
-      },
-      {
-        id: 'footer_1',
-        type: 'footer',
-        content: '© {{ current_year }} {{ company_name }}. All rights reserved.',
-        showUnsubscribe: true,
-        showAddress: true,
-        address: '{{ company_address }}',
-        styles: {
-          paddingTop: '20px',
-          paddingBottom: '30px',
-          paddingLeft: '20px',
-          paddingRight: '20px',
-          fontSize: '12px',
-          color: '#9ca3af',
-          textAlign: 'center',
-          backgroundColor: '#f9fafb',
-        }
+        return await response.json();
+      } catch (error) {
+        console.warn('Error loading initial blocks:', error);
+        return [];
       }
-    ];
+    }
 
     // Initialize the email builder
-    const builder = createMailBuilder({
-      container: '#app',
-      initialBlocks: initialBlocks,
-      initialStyles: {
-        body: {
-          backgroundColor: '#f4f4f4',
-          fontFamily: 'Arial, Helvetica, sans-serif',
-          fontSize: '16px',
-          lineHeight: '1.5',
-          color: '#333333',
+    async function initBuilder() {
+      const initialBlocks = await loadInitialBlocks();
+      
+      const builder = createMailBuilder({
+        container: '#app',
+        initialBlocks: initialBlocks,
+        initialStyles: {
+          body: {
+            backgroundColor: '#f4f4f4',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontSize: '16px',
+            lineHeight: '1.5',
+            color: '#333333',
+            margin: '0',
+            padding: '0',
+          },
+          container: {
+            backgroundColor: '#ffffff',
+            maxWidth: '600px',
+            borderRadius: '0',
+            padding: '0',
+            borderWidth: '0',
+            borderColor: '#e5e7eb',
+            borderStyle: 'solid',
+          },
+          link: {
+            color: '#3b82f6',
+            textDecoration: 'underline',
+            hoverColor: '#2563eb',
+          },
+          heading: {
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            color: '#111827',
+            fontWeight: '700',
+          },
         },
-        container: {
-          backgroundColor: '#ffffff',
-          maxWidth: '600px',
-          borderRadius: '0',
-          padding: '0',
+        variables: [
+          { id: 'var_1', name: 'First Name', key: 'first_name', defaultValue: 'Subscriber' },
+          { id: 'var_2', name: 'Last Name', key: 'last_name', defaultValue: '' },
+          { id: 'var_3', name: 'Email', key: 'email', defaultValue: '' },
+          { id: 'var_4', name: 'Company Name', key: 'company_name', defaultValue: 'Your Company' },
+          { id: 'var_5', name: 'Company Address', key: 'company_address', defaultValue: '123 Main St, City, Country' },
+          { id: 'var_6', name: 'Unsubscribe Link', key: 'unsubscribe_link', defaultValue: '#unsubscribe' },
+          { id: 'var_7', name: 'View in Browser', key: 'view_in_browser_link', defaultValue: '#' },
+          { id: 'var_8', name: 'Current Year', key: 'current_year', defaultValue: new Date().getFullYear().toString() },
+        ],
+        autosave: false,
+        onBlockSelect: (block) => {
+          console.log('Selected block:', block);
         },
-        link: {
-          color: '#3b82f6',
-          textDecoration: 'underline',
+        onBlockChange: (blocks) => {
+          console.log('Blocks updated:', blocks.length, 'blocks');
         },
-      },
-      variables: [
-        { id: 'var_1', name: 'First Name', key: 'first_name', defaultValue: 'Subscriber' },
-        { id: 'var_2', name: 'Last Name', key: 'last_name', defaultValue: '' },
-        { id: 'var_3', name: 'Email', key: 'email', defaultValue: '' },
-        { id: 'var_4', name: 'Company Name', key: 'company_name', defaultValue: 'Your Company' },
-        { id: 'var_5', name: 'Company Address', key: 'company_address', defaultValue: '123 Main St, City, Country' },
-        { id: 'var_6', name: 'Unsubscribe Link', key: 'unsubscribe_link', defaultValue: '#unsubscribe' },
-        { id: 'var_7', name: 'View in Browser', key: 'view_in_browser_link', defaultValue: '#' },
-        { id: 'var_8', name: 'Current Year', key: 'current_year', defaultValue: new Date().getFullYear().toString() },
-      ],
-      autosave: false,
-      onBlockSelect: (block) => {
-        console.log('Selected block:', block);
-      },
-      onBlockChange: (blocks) => {
-        console.log('Blocks updated:', blocks.length, 'blocks');
-      },
-      onSave: (data) => {
-        console.log('Email saved:', data);
-        localStorage.setItem('mailbuilder_draft', JSON.stringify(data));
-      },
-    });
+        onSave: (data) => {
+          console.log('Email saved:', data);
+          localStorage.setItem('mailbuilder_draft', JSON.stringify(data));
+        },
+      });
 
-    // Expose builder to window for debugging
-    window.mailBuilder = builder;
-    
-    console.log('MailBuilder initialized successfully!');
-    console.log('Access the builder instance via window.mailBuilder');
+      // Expose builder to window for debugging
+      window.mailBuilder = builder;
+      
+      console.log('MailBuilder initialized successfully!');
+      console.log('Access the builder instance via window.mailBuilder');
+    }
+
+    // Start the builder
+    initBuilder();
   </script>
 </body>
 </html>

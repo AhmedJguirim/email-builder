@@ -57,16 +57,27 @@ export interface EmailStyles {
     fontSize: string;
     lineHeight: string;
     color: string;
+    margin?: string;
+    padding?: string;
   };
   container: {
     backgroundColor: string;
     maxWidth: string;
     borderRadius?: string;
     padding?: string;
+    borderWidth?: string;
+    borderColor?: string;
+    borderStyle?: string;
   };
   link: {
     color: string;
     textDecoration: string;
+    hoverColor?: string;
+  };
+  heading: {
+    fontFamily?: string;
+    color?: string;
+    fontWeight?: string;
   };
 }
 
@@ -77,16 +88,27 @@ export const DEFAULT_EMAIL_STYLES: EmailStyles = {
     fontSize: '16px',
     lineHeight: '1.5',
     color: '#333333',
+    margin: '0',
+    padding: '0',
   },
   container: {
     backgroundColor: '#ffffff',
     maxWidth: '600px',
     borderRadius: '0',
     padding: '0',
+    borderWidth: '0',
+    borderColor: '#e5e7eb',
+    borderStyle: 'solid',
   },
   link: {
     color: '#3b82f6',
     textDecoration: 'underline',
+    hoverColor: '#2563eb',
+  },
+  heading: {
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    color: '#111827',
+    fontWeight: '700',
   },
 };
 

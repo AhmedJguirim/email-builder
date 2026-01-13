@@ -7,13 +7,15 @@ export interface DragData {
   blockType?: BlockType;
   blockId?: string;
   sourceIndex?: number;
+  sourceParentId?: string;
 }
 
 export interface DropTarget {
   blockId: string;
   index: number;
-  position: 'before' | 'after';
+  position: 'before' | 'after' | 'inside';
   element: HTMLElement;
+  parentId?: string; // Column ID for dropping inside columns
 }
 
 interface BlockRect {
@@ -23,6 +25,18 @@ interface BlockRect {
   bottom: number;
   height: number;
   element: HTMLElement;
+  parentId?: string; // Column ID if this block is inside a column
+}
+
+interface ColumnRect {
+  id: string;
+  parentBlockId: string;
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  element: HTMLElement;
+  childRects: BlockRect[];
 }
 
 export class DragDropManager {
@@ -30,9 +44,11 @@ export class DragDropManager {
   private ghostElement: HTMLElement | null = null;
   private currentTarget: DropTarget | null = null;
   private blockRects: BlockRect[] = [];
+  private columnRects: ColumnRect[] = [];
   private canvas: HTMLElement | null = null;
   private rafId: number | null = null;
   private lastY: number = 0;
+  private lastX: number = 0;
 
   constructor() {
     this.handleDragOver = this.handleDragOver.bind(this);
@@ -88,9 +104,12 @@ export class DragDropManager {
 
   private cacheBlockPositions(): void {
     this.blockRects = [];
-    const blocks = document.querySelectorAll('.block-wrapper[data-block-id]');
+    this.columnRects = [];
     
-    blocks.forEach((block, index) => {
+    // Cache top-level blocks (excluding those inside columns)
+    const topLevelBlocks = document.querySelectorAll('.email-container > .block-wrapper[data-block-id]');
+    
+    topLevelBlocks.forEach((block, index) => {
       const rect = block.getBoundingClientRect();
       const id = block.getAttribute('data-block-id') || '';
       
@@ -101,6 +120,42 @@ export class DragDropManager {
         bottom: rect.bottom,
         height: rect.height,
         element: block as HTMLElement,
+      });
+    });
+
+    // Cache column drop zones
+    const columnDropZones = document.querySelectorAll('.column-drop-zone[data-column-id]');
+    columnDropZones.forEach((zone) => {
+      const rect = zone.getBoundingClientRect();
+      const columnId = zone.getAttribute('data-column-id') || '';
+      const parentBlockId = zone.getAttribute('data-parent-block-id') || '';
+      
+      // Get blocks inside this column
+      const childBlocks = zone.querySelectorAll('.block-wrapper[data-block-id]');
+      const childRects: BlockRect[] = [];
+      
+      childBlocks.forEach((child, idx) => {
+        const childRect = child.getBoundingClientRect();
+        childRects.push({
+          id: child.getAttribute('data-block-id') || '',
+          index: idx,
+          top: childRect.top,
+          bottom: childRect.bottom,
+          height: childRect.height,
+          element: child as HTMLElement,
+          parentId: columnId,
+        });
+      });
+      
+      this.columnRects.push({
+        id: columnId,
+        parentBlockId,
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+        element: zone as HTMLElement,
+        childRects,
       });
     });
   }
@@ -143,21 +198,36 @@ export class DragDropManager {
     }
 
     const y = event.clientY;
+    const x = event.clientX;
     this.lastY = y;
+    this.lastX = x;
 
     // Throttle with RAF
     if (this.rafId) return;
     
     this.rafId = requestAnimationFrame(() => {
       this.rafId = null;
-      this.updateGhostPosition(event.clientX, this.lastY);
-      this.updateDropTarget(this.lastY);
+      this.updateGhostPosition(this.lastX, this.lastY);
+      this.updateDropTarget(this.lastX, this.lastY);
     });
   }
 
-  private updateDropTarget(y: number): void {
+  private updateDropTarget(x: number, y: number): void {
     // Clear all shifts first
     this.clearAllShifts();
+    
+    // First check if we're over a column drop zone
+    const columnTarget = this.findColumnTarget(x, y);
+    if (columnTarget) {
+      this.currentTarget = columnTarget;
+      this.highlightColumnDropZone(columnTarget);
+      return;
+    }
+
+    // Clear column highlights
+    document.querySelectorAll('.column-drop-zone').forEach(el => {
+      el.classList.remove('drag-over');
+    });
     
     if (this.blockRects.length === 0) {
       // Empty canvas - show empty state indicator
@@ -219,6 +289,52 @@ export class DragDropManager {
       
       // Animate blocks to shift
       this.animateBlockShift(target, draggedIndex);
+    }
+  }
+
+  private findColumnTarget(x: number, y: number): DropTarget | null {
+    for (const column of this.columnRects) {
+      // Check if cursor is within column bounds
+      if (x >= column.left && x <= column.right && y >= column.top && y <= column.bottom) {
+        // Check if dropping on existing blocks in column
+        for (let i = 0; i < column.childRects.length; i++) {
+          const childRect = column.childRects[i];
+          
+          // Skip the block being dragged
+          if (this.dragData?.blockId === childRect.id) continue;
+          
+          const midY = childRect.top + childRect.height / 2;
+          if (y < childRect.bottom) {
+            return {
+              blockId: childRect.id,
+              index: childRect.index,
+              position: y < midY ? 'before' : 'after',
+              element: childRect.element,
+              parentId: column.id,
+            };
+          }
+        }
+        
+        // If no child blocks or past all children, drop at end of column
+        return {
+          blockId: column.id,
+          index: column.childRects.length,
+          position: 'inside',
+          element: column.element,
+          parentId: column.id,
+        };
+      }
+    }
+    return null;
+  }
+
+  private highlightColumnDropZone(target: DropTarget): void {
+    // Highlight the column
+    if (target.parentId) {
+      const columnEl = document.querySelector(`[data-column-id="${target.parentId}"]`);
+      if (columnEl) {
+        columnEl.classList.add('drag-over');
+      }
     }
   }
 
@@ -312,6 +428,13 @@ export class DragDropManager {
 
     const store = useEditorStore.getState();
 
+    // Handle dropping into a column
+    if (this.currentTarget?.parentId) {
+      this.handleColumnDrop(store);
+      this.cleanup();
+      return;
+    }
+
     if (this.blockRects.length === 0) {
       // Dropping on empty canvas
       if (this.dragData.type === 'new-block' && this.dragData.blockType) {
@@ -357,6 +480,29 @@ export class DragDropManager {
     this.cleanup();
   }
 
+  private handleColumnDrop(store: ReturnType<typeof useEditorStore.getState>): void {
+    if (!this.currentTarget?.parentId || !this.dragData) return;
+
+    const parentId = this.currentTarget.parentId;
+    let targetIndex = this.currentTarget.index;
+    
+    if (this.currentTarget.position === 'after') {
+      targetIndex += 1;
+    }
+
+    if (this.dragData.type === 'new-block' && this.dragData.blockType) {
+      // Don't allow dropping columns inside columns
+      if (this.dragData.blockType === 'columns') {
+        return;
+      }
+      const newBlock = createBlock(this.dragData.blockType);
+      store.addBlock(newBlock, targetIndex, parentId);
+    } else if (this.dragData.type === 'existing-block' && this.dragData.blockId) {
+      // Move existing block into column
+      store.moveBlock(this.dragData.blockId, targetIndex, parentId);
+    }
+  }
+
   private handleDragEnd(): void {
     this.cleanup();
   }
@@ -393,12 +539,18 @@ export class DragDropManager {
       emptyZone.classList.remove('drag-over');
     }
 
+    // Remove column highlights
+    document.querySelectorAll('.column-drop-zone').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+
     // Remove all drop indicators
     document.querySelectorAll('.drop-indicator-line').forEach(el => el.remove());
     
     this.dragData = null;
     this.currentTarget = null;
     this.blockRects = [];
+    this.columnRects = [];
     
     document.removeEventListener('dragover', this.handleDragOver);
     document.removeEventListener('drop', this.handleDrop);
