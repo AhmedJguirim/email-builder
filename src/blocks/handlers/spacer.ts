@@ -2,6 +2,12 @@ import type { Block, SpacerBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const spacerHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'spacer') return '';
+    const spacer = block as SpacerBlock;
+    return `<div style="height: ${spacer.height};"></div>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'spacer') return '';
     const spacer = block as SpacerBlock;

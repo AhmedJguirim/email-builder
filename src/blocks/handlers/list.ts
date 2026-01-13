@@ -2,6 +2,13 @@ import type { Block, ListBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const listHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'list') return '';
+    const list = block as ListBlock;
+    const listTag = list.listType === 'ordered' ? 'ol' : 'ul';
+    return `<${listTag} style="margin: 0; padding-left: 20px;">${list.items.map(item => `<li>${item.content}</li>`).join('')}</${listTag}>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'list') return '';
     const list = block as ListBlock;
@@ -49,6 +56,7 @@ export const listHandler: BlockHandler = {
         const index = parseInt((input as HTMLElement).dataset.index || '0');
         const newItems = [...list.items];
         newItems[index] = { ...newItems[index], content: (input as HTMLInputElement).value };
+        list.items = newItems;
         callbacks.updateBlock(block.id, { items: newItems } as Partial<Block>);
         callbacks.renderCanvas();
       });

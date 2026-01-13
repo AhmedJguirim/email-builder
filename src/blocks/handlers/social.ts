@@ -1,7 +1,22 @@
 import type { Block, SocialBlock, SocialLink } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
+import { getSocialIcon } from './social-helper';
 
 export const socialHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'social') return '';
+    const social = block as SocialBlock;
+    return `
+      <div style="text-align: ${social.alignment};">
+        ${social.links.map(link => `
+          <a href="${link.url}" style="display: inline-block; margin: 0 ${social.spacing}; text-decoration: none;">
+            ${getSocialIcon(link.platform, social.iconSize, social.iconStyle)}
+          </a>
+        `).join('')}
+      </div>
+    `;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'social') return '';
     const social = block as SocialBlock;
@@ -17,6 +32,15 @@ export const socialHandler: BlockHandler = {
       <div class="property-group">
         <label>Icon Size</label>
         <input type="text" id="social-icon-size" value="${social.iconSize}" />
+      </div>
+      <div class="property-group">
+        <label>Icon Style</label>
+        <select id="social-icon-style">
+          <option value="color" ${social.iconStyle === 'color' ? 'selected' : ''}>Color</option>
+          <option value="dark" ${social.iconStyle === 'dark' ? 'selected' : ''}>Dark</option>
+          <option value="light" ${social.iconStyle === 'light' ? 'selected' : ''}>Light</option>
+          <option value="outline" ${social.iconStyle === 'outline' ? 'selected' : ''}>Outline</option>
+        </select>
       </div>
       <div class="property-group">
         <label>Spacing</label>
@@ -57,6 +81,7 @@ export const socialHandler: BlockHandler = {
     const simpleHandlers: Record<string, (value: string) => Partial<Block>> = {
       'social-alignment': (v) => ({ alignment: v as 'left' | 'center' | 'right' }),
       'social-icon-size': (v) => ({ iconSize: v }),
+      'social-icon-style': (v) => ({ iconStyle: v as 'color' | 'dark' | 'light' | 'outline' }),
       'social-spacing': (v) => ({ spacing: v }),
     };
 

@@ -12,6 +12,7 @@ import { DragDropManager, dragDropManager } from './DragDropManager';
 import { KeyboardManager, keyboardManager } from './KeyboardManager';
 import { createStorageProvider, StorageFactoryConfig } from '../storage';
 import { stylesToCss } from '../utils/styles';
+import { getBlockHandler } from '../blocks/handlers';
 
 export class MailBuilder {
   private container: HTMLElement;
@@ -355,85 +356,33 @@ export class MailBuilder {
   }
 
   private renderBlockContent(block: Block): string {
-    switch (block.type) {
-      case 'text':
-        return `<div class="editable-text" contenteditable="true">${block.content}</div>`;
-      case 'heading':
-        return `<h${block.level} class="editable-heading" contenteditable="true">${block.content}</h${block.level}>`;
-      case 'image':
-        return block.src 
-          ? `<img src="${block.src}" alt="${block.alt}" style="width: ${block.width || '100%'}; max-width: 100%; height: auto; display: block; margin: 0 auto;" />`
-          : `<div class="placeholder image-placeholder">Click to add image</div>`;
-      case 'button':
-        return `<a href="#" class="email-button" style="display: inline-block; background: ${block.buttonStyles.backgroundColor}; color: ${block.buttonStyles.textColor}; padding: ${block.buttonStyles.paddingY} ${block.buttonStyles.paddingX}; border-radius: ${block.buttonStyles.borderRadius}; text-decoration: none;">${block.text}</a>`;
-      case 'divider':
-        return `<hr style="border: none; border-top: ${block.dividerStyles.thickness} ${block.dividerStyles.style} ${block.dividerStyles.color}; width: ${block.dividerStyles.width};" />`;
-      case 'spacer':
-        return `<div style="height: ${block.height};"></div>`;
-      case 'columns':
-        return `
-          <table width="100%" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
-            <tr>
-              ${block.columns.map(col => `
-                <td style="width: ${col.width}; vertical-align: top; padding: 10px;">
-                  <div class="column-drop-zone" data-column-id="${col.id}" data-parent-block-id="${block.id}">
-                    ${col.children.length === 0 
-                      ? '<div class="placeholder column-placeholder">Drop blocks here</div>'
-                      : col.children.map((child, idx) => this.renderBlockEditor(child, idx, useEditorStore.getState().selectedBlockId)).join('')
-                    }
-                  </div>
-                </td>
-              `).join('')}
-            </tr>
-          </table>
-        `;
-      case 'social':
-        return `
-          <div style="text-align: ${block.alignment};">
-            ${block.links.map(link => `
-              <a href="${link.url}" style="display: inline-block; margin: 0 ${block.spacing}; text-decoration: none;">
-                ${this.getSocialIcon(link.platform, block.iconSize, block.iconStyle)}
-              </a>
+    // Special handling for columns block which needs access to renderBlockEditor
+    if (block.type === 'columns') {
+      return `
+        <table width="100%" cellpadding="0" cellspacing="0" style="table-layout: fixed;">
+          <tr>
+            ${block.columns.map(col => `
+              <td style="width: ${col.width}; vertical-align: top; padding: 10px;">
+                <div class="column-drop-zone" data-column-id="${col.id}" data-parent-block-id="${block.id}">
+                  ${col.children.length === 0 
+                    ? '<div class="placeholder column-placeholder">Drop blocks here</div>'
+                    : col.children.map((child, idx) => this.renderBlockEditor(child, idx, useEditorStore.getState().selectedBlockId)).join('')
+                  }
+                </div>
+              </td>
             `).join('')}
-          </div>
-        `;
-      case 'logo':
-        return block.src
-          ? `<img src="${block.src}" alt="${block.alt}" style="width: ${block.width}; height: auto; display: block; margin: 0 ${block.alignment === 'center' ? 'auto' : block.alignment === 'right' ? '0 0 auto' : 'auto 0 0'};" />`
-          : `<div class="placeholder logo-placeholder">Click to add logo</div>`;
-      case 'menu':
-        return `<div style="text-align: center;">${block.items.map(item => `<a href="${item.link}" style="margin: 0 8px; color: inherit; text-decoration: none;">${item.text}</a>`).join(block.separator)}</div>`;
-      case 'footer':
-        return `<div style="font-size: 12px; color: #666;">${block.content}</div>`;
-      case 'header':
-        return `<div style="font-size: 12px; color: #666;">${block.showWebVersion ? block.webVersionText : ''}</div>`;
-      case 'list':
-        const listTag = block.listType === 'ordered' ? 'ol' : 'ul';
-        return `<${listTag} style="margin: 0; padding-left: 20px;">${block.items.map(item => `<li>${item.content}</li>`).join('')}</${listTag}>`;
-      case 'html':
-        return `<div class="html-preview">${block.content}</div>`;
-      case 'video':
-        if (block.videoUrl) {
-          const videoId = this.extractYouTubeId(block.videoUrl);
-          const thumbnailUrl = block.thumbnailUrl || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '');
-          return `
-            <div class="video-preview" style="position: relative; cursor: pointer;">
-              ${thumbnailUrl 
-                ? `<img src="${thumbnailUrl}" alt="Video thumbnail" style="width: 100%; height: auto; display: block;" onerror="this.src='https://img.youtube.com/vi/${videoId}/hqdefault.jpg'" />`
-                : `<div style="background: #000; padding: 80px; text-align: center; color: #fff;">Video: ${block.videoUrl}</div>`
-              }
-              <div class="play-button-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 68px; height: 48px; background: ${block.playButtonColor}; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </div>
-            </div>
-          `;
-        }
-        return `<div class="placeholder video-placeholder">Click to add video URL</div>`;
-      default:
-        return `<div>Unknown block type</div>`;
+          </tr>
+        </table>
+      `;
     }
+
+    // Use handler for all other block types
+    const handler = getBlockHandler(block.type);
+    if (handler) {
+      return handler.renderContent(block);
+    }
+
+    return `<div>Unknown block type: ${block.type}</div>`;
   }
 
   private attachCanvasEventListeners(canvas: HTMLElement): void {
@@ -646,6 +595,18 @@ export class MailBuilder {
   }
 
   private renderBlockProperties(block: Block): string {
+    // Use handler to render block-specific properties
+    const handler = getBlockHandler(block.type);
+    if (handler) {
+      return handler.renderProperties(block);
+    }
+    
+    // Fallback for unknown block types
+    return `<p>No properties available for this block type.</p>`;
+  }
+
+  private renderBlockPropertiesOLD_DEPRECATED(block: Block): string {
+    // THIS METHOD IS DEPRECATED - KEEPING FOR REFERENCE ONLY
     switch (block.type) {
       case 'button':
         return `
@@ -1107,17 +1068,20 @@ export class MailBuilder {
   private attachBlockPropertyListeners(properties: HTMLElement, block: Block): void {
     const store = useEditorStore.getState();
 
-    properties.querySelectorAll('input, select, textarea').forEach(input => {
-      input.addEventListener('change', () => {
-        const id = (input as HTMLElement).id;
-        const value = (input as HTMLInputElement).type === 'checkbox' 
-          ? (input as HTMLInputElement).checked 
-          : (input as HTMLInputElement | HTMLTextAreaElement).value;
-
-        this.updateBlockProperty(block.id, id, value);
+    // Use handler to attach block-specific listeners
+    const handler = getBlockHandler(block.type);
+    if (handler) {
+      handler.attachListeners(properties, block, {
+        updateBlock: (blockId: string, updates: Partial<Block>) => {
+          store.updateBlock(blockId, updates);
+        },
+        renderCanvas: () => this.renderCanvas(),
+        renderProperties: () => this.renderProperties(),
+        handleImageUpload: (blockId: string) => this.handleImageUpload(blockId),
       });
-    });
+    }
 
+    // Common listeners for all blocks (alignment buttons)
     properties.querySelectorAll('.align-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const align = (btn as HTMLElement).dataset.align as 'left' | 'center' | 'right';
@@ -1128,501 +1092,6 @@ export class MailBuilder {
         this.renderCanvas();
       });
     });
-
-    const uploadBtn = properties.querySelector('#btn-upload-image');
-    if (uploadBtn) {
-      uploadBtn.addEventListener('click', () => this.handleImageUpload(block.id));
-    }
-
-    const imgWidthSlider = properties.querySelector('#img-width-slider') as HTMLInputElement;
-    const imgWidthInput = properties.querySelector('#img-width') as HTMLInputElement;
-    const imgWidthValue = properties.querySelector('#img-width-value');
-    if (imgWidthSlider && imgWidthInput) {
-      imgWidthSlider.addEventListener('input', () => {
-        const value = `${imgWidthSlider.value}%`;
-        imgWidthInput.value = value;
-        if (imgWidthValue) imgWidthValue.textContent = value;
-        store.updateBlock(block.id, { width: value } as Partial<Block>);
-        this.renderCanvas();
-      });
-    }
-
-    const uploadLogoBtn = properties.querySelector('#btn-upload-logo');
-    if (uploadLogoBtn) {
-      uploadLogoBtn.addEventListener('click', () => this.handleLogoUpload(block.id));
-    }
-
-    if (block.type === 'list') {
-      this.attachListItemListeners(properties as HTMLElement, block);
-    }
-
-    if (block.type === 'social') {
-      this.attachSocialLinkListeners(properties as HTMLElement, block);
-    }
-
-    if (block.type === 'menu') {
-      this.attachMenuItemListeners(properties as HTMLElement, block);
-    }
-
-    if (block.type === 'columns') {
-      this.attachColumnsListeners(properties as HTMLElement, block);
-    }
-  }
-
-  private attachListItemListeners(properties: HTMLElement, block: Block): void {
-    if (block.type !== 'list') return;
-    const store = useEditorStore.getState();
-
-    properties.querySelectorAll('.list-item-input').forEach(input => {
-      const updateItem = () => {
-        const index = parseInt((input as HTMLElement).dataset.index || '0');
-        const newItems = [...block.items];
-        newItems[index] = { ...newItems[index], content: (input as HTMLInputElement).value };
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderCanvas();
-      };
-      
-      input.addEventListener('change', updateItem);
-      input.addEventListener('blur', updateItem);
-    });
-
-    properties.querySelectorAll('.remove-list-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const index = parseInt((btn as HTMLElement).dataset.index || '0');
-        const newItems = block.items.filter((_, i) => i !== index);
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderProperties();
-        this.renderCanvas();
-      });
-    });
-
-    const addBtn = properties.querySelector('#add-list-item');
-    if (addBtn) {
-      addBtn.addEventListener('click', () => {
-        const newItems = [...block.items, { id: `list-item-${Date.now()}`, content: 'New item' }];
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderProperties();
-        this.renderCanvas();
-      });
-    }
-  }
-
-  private attachSocialLinkListeners(properties: HTMLElement, block: Block): void {
-    if (block.type !== 'social') return;
-    const store = useEditorStore.getState();
-
-    properties.querySelectorAll('.social-platform-select').forEach(select => {
-      select.addEventListener('change', () => {
-        const index = parseInt((select as HTMLElement).dataset.index || '0');
-        const newLinks = [...block.links];
-        newLinks[index] = { ...newLinks[index], platform: (select as HTMLSelectElement).value as any };
-        store.updateBlock(block.id, { links: newLinks } as Partial<Block>);
-        this.renderCanvas();
-      });
-    });
-
-    properties.querySelectorAll('.social-url-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const index = parseInt((input as HTMLElement).dataset.index || '0');
-        const newLinks = [...block.links];
-        newLinks[index] = { ...newLinks[index], url: (input as HTMLInputElement).value };
-        store.updateBlock(block.id, { links: newLinks } as Partial<Block>);
-        this.renderCanvas();
-      });
-    });
-
-    properties.querySelectorAll('.remove-social-link').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const index = parseInt((btn as HTMLElement).dataset.index || '0');
-        const newLinks = block.links.filter((_, i) => i !== index);
-        store.updateBlock(block.id, { links: newLinks } as Partial<Block>);
-        this.renderProperties();
-        this.renderCanvas();
-      });
-    });
-
-    const addBtn = properties.querySelector('#add-social-link');
-    if (addBtn) {
-      addBtn.addEventListener('click', () => {
-        const newLinks = [...block.links, { id: `social-link-${Date.now()}`, platform: 'facebook' as const, url: '#' }];
-        store.updateBlock(block.id, { links: newLinks } as Partial<Block>);
-        this.renderProperties();
-        this.renderCanvas();
-      });
-    }
-  }
-
-  private attachMenuItemListeners(properties: HTMLElement, block: Block): void {
-    if (block.type !== 'menu') return;
-    const store = useEditorStore.getState();
-
-    properties.querySelectorAll('.menu-item-text').forEach(input => {
-      const updateText = () => {
-        const index = parseInt((input as HTMLElement).dataset.index || '0');
-        const newItems = [...block.items];
-        newItems[index] = { ...newItems[index], text: (input as HTMLInputElement).value };
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderCanvas();
-      };
-      
-      input.addEventListener('change', updateText);
-      input.addEventListener('blur', updateText);
-    });
-
-    properties.querySelectorAll('.menu-item-link').forEach(input => {
-      const updateLink = () => {
-        const index = parseInt((input as HTMLElement).dataset.index || '0');
-        const newItems = [...block.items];
-        newItems[index] = { ...newItems[index], link: (input as HTMLInputElement).value };
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderCanvas();
-      };
-      
-      input.addEventListener('change', updateLink);
-      input.addEventListener('blur', updateLink);
-    });
-
-    properties.querySelectorAll('.remove-menu-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const index = parseInt((btn as HTMLElement).dataset.index || '0');
-        const newItems = block.items.filter((_, i) => i !== index);
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderProperties();
-        this.renderCanvas();
-      });
-    });
-
-    const addBtn = properties.querySelector('#add-menu-item');
-    if (addBtn) {
-      addBtn.addEventListener('click', () => {
-        const newItems = [...block.items, { id: `menu-item-${Date.now()}`, text: 'New Link', link: '#' }];
-        store.updateBlock(block.id, { items: newItems } as Partial<Block>);
-        this.renderProperties();
-        this.renderCanvas();
-      });
-    }
-  }
-
-  private attachColumnsListeners(properties: HTMLElement, block: Block): void {
-    if (block.type !== 'columns') return;
-    const store = useEditorStore.getState();
-
-    const gapInput = properties.querySelector('#columns-gap') as HTMLInputElement;
-    if (gapInput) {
-      gapInput.addEventListener('change', () => {
-        store.updateBlock(block.id, { gap: gapInput.value } as Partial<Block>);
-        this.renderCanvas();
-      });
-    }
-
-    const stackCheckbox = properties.querySelector('#columns-stack-mobile') as HTMLInputElement;
-    if (stackCheckbox) {
-      stackCheckbox.addEventListener('change', () => {
-        store.updateBlock(block.id, { stackOnMobile: stackCheckbox.checked } as Partial<Block>);
-        this.renderCanvas();
-      });
-    }
-
-    const reverseCheckbox = properties.querySelector('#columns-reverse-mobile') as HTMLInputElement;
-    if (reverseCheckbox) {
-      reverseCheckbox.addEventListener('change', () => {
-        store.updateBlock(block.id, { mobileReverse: reverseCheckbox.checked } as Partial<Block>);
-        this.renderCanvas();
-      });
-    }
-
-    properties.querySelectorAll('.column-width-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const index = parseInt((input as HTMLElement).dataset.index || '0');
-        const newColumns = [...block.columns];
-        newColumns[index] = { ...newColumns[index], width: (input as HTMLInputElement).value };
-        store.updateBlock(block.id, { columns: newColumns } as Partial<Block>);
-        this.renderCanvas();
-      });
-    });
-  }
-
-  private getSocialIcon(platform: string, size: string, style: string): string {
-    const colors: Record<string, string> = {
-      facebook: '#1877f2',
-      twitter: '#1da1f2',
-      instagram: '#e4405f',
-      linkedin: '#0a66c2',
-      youtube: '#ff0000',
-      tiktok: '#000000',
-      pinterest: '#bd081c',
-    };
-    const color = style === 'color' ? (colors[platform] || '#333') : (style === 'light' ? '#fff' : '#333');
-    const bgColor = style === 'outline' ? 'transparent' : (style === 'light' ? '#333' : 'transparent');
-    const border = style === 'outline' ? `2px solid ${color}` : 'none';
-    
-    const icons: Record<string, string> = {
-      facebook: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
-      twitter: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
-      instagram: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
-      linkedin: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
-      youtube: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
-      tiktok: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>`,
-      pinterest: `<svg viewBox="0 0 24 24" fill="${color}"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/></svg>`,
-    };
-    
-    const sizeNum = parseInt(size) || 32;
-    return `<span style="display: inline-block; width: ${sizeNum}px; height: ${sizeNum}px; background: ${bgColor}; border: ${border}; border-radius: 50%; padding: 6px; box-sizing: border-box;">${icons[platform] || icons.facebook}</span>`;
-  }
-
-  private extractYouTubeId(url: string): string | null {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#]+)/,
-      /^([a-zA-Z0-9_-]{11})$/
-    ];
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match) return match[1];
-    }
-    return null;
-  }
-
-  private async handleLogoUpload(blockId: string): Promise<void> {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) return;
-
-      try {
-        let url: string;
-        
-        if (this.config.onAssetUpload) {
-          url = await this.config.onAssetUpload(file);
-        } else if (this.storageProvider) {
-          const result = await this.storageProvider.upload(file);
-          url = result.url;
-        } else {
-          url = URL.createObjectURL(file);
-        }
-
-        useEditorStore.getState().updateBlock(blockId, { src: url } as Partial<Block>);
-        this.renderCanvas();
-        this.renderProperties();
-      } catch (error) {
-        console.error('Failed to upload logo:', error);
-      }
-    };
-
-    input.click();
-  }
-
-  private updateBlockProperty(blockId: string, propertyId: string, value: string | boolean): void {
-    const store = useEditorStore.getState();
-    const block = store.getBlockById(blockId);
-    if (!block) return;
-
-    const updates: Partial<Block> = {};
-
-    switch (propertyId) {
-      case 'btn-text':
-        (updates as any).text = value;
-        break;
-      case 'btn-link':
-        (updates as any).link = value;
-        break;
-      case 'btn-bg-color':
-        if (block.type === 'button') {
-          (updates as any).buttonStyles = { ...block.buttonStyles, backgroundColor: value };
-        }
-        break;
-      case 'btn-text-color':
-        if (block.type === 'button') {
-          (updates as any).buttonStyles = { ...block.buttonStyles, textColor: value };
-        }
-        break;
-      case 'btn-radius':
-        if (block.type === 'button') {
-          (updates as any).buttonStyles = { ...block.buttonStyles, borderRadius: value };
-        }
-        break;
-      case 'btn-full-width':
-        if (block.type === 'button') {
-          (updates as any).buttonStyles = { ...block.buttonStyles, fullWidth: value };
-        }
-        break;
-      case 'img-src':
-        (updates as any).src = value;
-        break;
-      case 'img-alt':
-        (updates as any).alt = value;
-        break;
-      case 'img-link':
-        (updates as any).link = value;
-        break;
-      case 'img-width':
-        (updates as any).width = value;
-        break;
-      case 'spacer-height':
-        (updates as any).height = value;
-        break;
-      case 'divider-style':
-        if (block.type === 'divider') {
-          (updates as any).dividerStyles = { ...block.dividerStyles, style: value };
-        }
-        break;
-      case 'divider-color':
-        if (block.type === 'divider') {
-          (updates as any).dividerStyles = { ...block.dividerStyles, color: value };
-        }
-        break;
-      case 'divider-thickness':
-        if (block.type === 'divider') {
-          (updates as any).dividerStyles = { ...block.dividerStyles, thickness: value };
-        }
-        break;
-      case 'divider-width':
-        if (block.type === 'divider') {
-          (updates as any).dividerStyles = { ...block.dividerStyles, width: value };
-        }
-        break;
-      case 'list-type':
-        if (block.type === 'list') {
-          (updates as any).listType = value;
-        }
-        break;
-      case 'video-url':
-        if (block.type === 'video') {
-          (updates as any).videoUrl = value;
-        }
-        break;
-      case 'video-thumbnail':
-        if (block.type === 'video') {
-          (updates as any).thumbnailUrl = value;
-        }
-        break;
-      case 'video-play-color':
-        if (block.type === 'video') {
-          (updates as any).playButtonColor = value;
-        }
-        break;
-      case 'social-alignment':
-        if (block.type === 'social') {
-          (updates as any).alignment = value;
-        }
-        break;
-      case 'social-icon-size':
-        if (block.type === 'social') {
-          (updates as any).iconSize = value;
-        }
-        break;
-      case 'social-spacing':
-        if (block.type === 'social') {
-          (updates as any).spacing = value;
-        }
-        break;
-      case 'menu-layout':
-        if (block.type === 'menu') {
-          (updates as any).layout = value;
-        }
-        break;
-      case 'menu-separator':
-        if (block.type === 'menu') {
-          (updates as any).separator = value;
-        }
-        break;
-      case 'logo-src':
-        if (block.type === 'logo') {
-          (updates as any).src = value;
-        }
-        break;
-      case 'logo-alt':
-        if (block.type === 'logo') {
-          (updates as any).alt = value;
-        }
-        break;
-      case 'logo-link':
-        if (block.type === 'logo') {
-          (updates as any).link = value;
-        }
-        break;
-      case 'logo-width':
-        if (block.type === 'logo') {
-          (updates as any).width = value;
-        }
-        break;
-      case 'logo-alignment':
-        if (block.type === 'logo') {
-          (updates as any).alignment = value;
-        }
-        break;
-      case 'header-preheader':
-        if (block.type === 'header') {
-          (updates as any).preheaderText = value;
-        }
-        break;
-      case 'header-show-web':
-        if (block.type === 'header') {
-          (updates as any).showWebVersion = value;
-        }
-        break;
-      case 'header-web-text':
-        if (block.type === 'header') {
-          (updates as any).webVersionText = value;
-        }
-        break;
-      case 'footer-content':
-        if (block.type === 'footer') {
-          (updates as any).content = value;
-        }
-        break;
-      case 'footer-show-unsubscribe':
-        if (block.type === 'footer') {
-          (updates as any).showUnsubscribe = value;
-        }
-        break;
-      case 'footer-show-address':
-        if (block.type === 'footer') {
-          (updates as any).showAddress = value;
-        }
-        break;
-      case 'footer-address':
-        if (block.type === 'footer') {
-          (updates as any).address = value;
-        }
-        break;
-      case 'html-content':
-        if (block.type === 'html') {
-          (updates as any).content = value;
-        }
-        break;
-      case 'padding-top':
-        updates.styles = { ...block.styles, paddingTop: value as string };
-        break;
-      case 'padding-right':
-        updates.styles = { ...block.styles, paddingRight: value as string };
-        break;
-      case 'padding-bottom':
-        updates.styles = { ...block.styles, paddingBottom: value as string };
-        break;
-      case 'padding-left':
-        updates.styles = { ...block.styles, paddingLeft: value as string };
-        break;
-      case 'block-bg-color':
-        updates.styles = { ...block.styles, backgroundColor: value as string };
-        break;
-      case 'font-size':
-        updates.styles = { ...block.styles, fontSize: value as string };
-        break;
-      case 'text-color':
-        updates.styles = { ...block.styles, color: value as string };
-        break;
-      case 'line-height':
-        updates.styles = { ...block.styles, lineHeight: value as string };
-        break;
-    }
-
-    if (Object.keys(updates).length > 0) {
-      store.updateBlock(blockId, updates);
-      this.renderCanvas();
-    }
   }
 
   private async handleImageUpload(blockId: string): Promise<void> {

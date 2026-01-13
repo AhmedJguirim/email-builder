@@ -2,6 +2,12 @@ import type { Block, FooterBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const footerHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'footer') return '';
+    const footer = block as FooterBlock;
+    return `<div style="font-size: 12px; color: #666;">${footer.content}</div>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'footer') return '';
     const footer = block as FooterBlock;

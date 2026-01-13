@@ -2,6 +2,7 @@ import type { BlockType } from '../../types/blocks';
 import type { BlockHandler } from './types';
 
 import { textHandler } from './text';
+import { headingHandler } from './heading';
 import { buttonHandler } from './button';
 import { imageHandler } from './image';
 import { dividerHandler } from './divider';
@@ -18,6 +19,7 @@ import { columnsHandler } from './columns';
 
 export const blockHandlers: Partial<Record<BlockType, BlockHandler>> = {
   text: textHandler,
+  heading: headingHandler,
   button: buttonHandler,
   image: imageHandler,
   divider: dividerHandler,

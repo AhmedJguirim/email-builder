@@ -2,6 +2,14 @@ import type { Block, ColumnsBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const columnsHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'columns') return '';
+    const columns = block as ColumnsBlock;
+    // Note: Columns rendering requires access to renderBlockEditor which is in MailBuilder
+    // This will be handled specially in MailBuilder.renderBlockContent
+    return '';
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'columns') return '';
     const columns = block as ColumnsBlock;

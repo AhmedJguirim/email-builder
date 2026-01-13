@@ -2,6 +2,16 @@ import type { Block, ImageBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const imageHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'image') return '';
+    const img = block as ImageBlock;
+    if (!img.src) {
+      return `<div class="placeholder image-placeholder">Click to add image</div>`;
+    }
+    const imgTag = `<img src="${img.src}" alt="${img.alt}" style="width: ${img.width || '100%'}; max-width: 100%; height: auto; display: block; margin: 0 auto;" />`;
+    return img.link ? `<a href="${img.link}">${imgTag}</a>` : imgTag;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'image') return '';
     const img = block as ImageBlock;

@@ -2,6 +2,17 @@ import type { Block, LogoBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const logoHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'logo') return '';
+    const logo = block as LogoBlock;
+    if (!logo.src) {
+      return `<div class="placeholder logo-placeholder">Click to add logo</div>`;
+    }
+    const marginStyle = logo.alignment === 'center' ? '0 auto' : logo.alignment === 'right' ? '0 0 0 auto' : '0 auto 0 0';
+    const imgTag = `<img src="${logo.src}" alt="${logo.alt}" style="width: ${logo.width}; height: auto; display: block; margin: ${marginStyle};" />`;
+    return logo.link ? `<a href="${logo.link}">${imgTag}</a>` : imgTag;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'logo') return '';
     const logo = block as LogoBlock;

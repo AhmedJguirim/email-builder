@@ -2,6 +2,12 @@ import type { Block, TextBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const textHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'text') return '';
+    const textBlock = block as TextBlock;
+    return `<div class="editable-text" contenteditable="true">${textBlock.content}</div>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'text') return '';
     return `

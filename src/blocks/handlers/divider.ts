@@ -2,6 +2,12 @@ import type { Block, DividerBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const dividerHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'divider') return '';
+    const div = block as DividerBlock;
+    return `<hr style="border: none; border-top: ${div.dividerStyles.thickness} ${div.dividerStyles.style} ${div.dividerStyles.color}; width: ${div.dividerStyles.width};" />`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'divider') return '';
     const div = block as DividerBlock;

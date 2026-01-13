@@ -2,6 +2,12 @@ import type { Block, HeaderBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const headerHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'header') return '';
+    const header = block as HeaderBlock;
+    return `<div style="font-size: 12px; color: #666;">${header.showWebVersion ? header.webVersionText : ''}</div>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'header') return '';
     const header = block as HeaderBlock;

@@ -2,6 +2,12 @@ import type { Block, MenuBlock, MenuItem } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const menuHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'menu') return '';
+    const menu = block as MenuBlock;
+    return `<div style="text-align: center;">${menu.items.map(item => `<a href="${item.link}" style="margin: 0 8px; color: inherit; text-decoration: none;">${item.text}</a>`).join(menu.separator)}</div>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'menu') return '';
     const menu = block as MenuBlock;

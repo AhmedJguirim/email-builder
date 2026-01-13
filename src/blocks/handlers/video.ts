@@ -1,7 +1,35 @@
 import type { Block, VideoBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
+function extractYouTubeId(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/);
+  return match ? match[1] : null;
+}
+
 export const videoHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'video') return '';
+    const video = block as VideoBlock;
+    if (!video.videoUrl) {
+      return `<div class="placeholder video-placeholder">Click to add video URL</div>`;
+    }
+    const videoId = extractYouTubeId(video.videoUrl);
+    const thumbnailUrl = video.thumbnailUrl || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '');
+    return `
+      <div class="video-preview" style="position: relative; cursor: pointer;">
+        ${thumbnailUrl 
+          ? `<img src="${thumbnailUrl}" alt="Video thumbnail" style="width: 100%; height: auto; display: block;" onerror="this.src='https://img.youtube.com/vi/${videoId}/hqdefault.jpg'" />`
+          : `<div style="background: #000; padding: 80px; text-align: center; color: #fff;">Video: ${video.videoUrl}</div>`
+        }
+        <div class="play-button-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 68px; height: 48px; background: ${video.playButtonColor}; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+    `;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'video') return '';
     const video = block as VideoBlock;

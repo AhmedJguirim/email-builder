@@ -2,6 +2,12 @@ import type { Block, HtmlBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const htmlHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'html') return '';
+    const html = block as HtmlBlock;
+    return `<div class="html-preview">${html.content}</div>`;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'html') return '';
     const html = block as HtmlBlock;

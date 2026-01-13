@@ -2,6 +2,24 @@ import type { Block, ButtonBlock } from '../../types/blocks';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const buttonHandler: BlockHandler = {
+  renderContent(block: Block): string {
+    if (block.type !== 'button') return '';
+    const btn = block as ButtonBlock;
+    const displayStyle = btn.buttonStyles.fullWidth ? 'display: block; width: 100%;' : 'display: inline-block;';
+    return `
+      <a href="${btn.link}" class="email-button" style="
+        ${displayStyle}
+        background-color: ${btn.buttonStyles.backgroundColor};
+        color: ${btn.buttonStyles.textColor};
+        padding: ${btn.buttonStyles.paddingY} ${btn.buttonStyles.paddingX};
+        border-radius: ${btn.buttonStyles.borderRadius};
+        text-decoration: none;
+        font-size: ${btn.buttonStyles.fontSize};
+        font-weight: ${btn.buttonStyles.fontWeight};
+      ">${btn.text}</a>
+    `;
+  },
+
   renderProperties(block: Block): string {
     if (block.type !== 'button') return '';
     const btn = block as ButtonBlock;
