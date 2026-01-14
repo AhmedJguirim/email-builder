@@ -44,9 +44,9 @@ export const buttonHandler: BlockHandler = {
       <div class="property-group">
         <label>Text Style</label>
         <div>
-          <button type="button" id="btn-bold" class="btn-small">B</button>
-          <button type="button" id="btn-italic" class="btn-small">I</button>
-          <button type="button" id="btn-underline" class="btn-small">U</button>
+          <button type="button" id="btn-bold" class="btn-small ${btn.buttonStyles.fontWeight === '700' ? 'active' : ''}">B</button>
+          <button type="button" id="btn-italic" class="btn-small ${btn.buttonStyles.fontStyle === 'italic' ? 'active' : ''}">I</button>
+          <button type="button" id="btn-underline" class="btn-small ${btn.buttonStyles.textDecoration === 'underline' ? 'active' : ''}">U</button>
         </div>
       </div>
       <div class="property-group">
@@ -108,7 +108,7 @@ export const buttonHandler: BlockHandler = {
         btn.buttonStyles.fontWeight = next;
         callbacks.updateBlock(block.id, { buttonStyles: { ...btn.buttonStyles, fontWeight: next } } as Partial<Block>);
         callbacks.renderCanvas();
-        console.log(btn.buttonStyles);
+        boldBtn.classList.toggle('active');
       });
     }
 
@@ -119,7 +119,7 @@ export const buttonHandler: BlockHandler = {
         btn.buttonStyles.fontStyle = next;
         callbacks.updateBlock(block.id, { buttonStyles: { ...btn.buttonStyles, fontStyle: next } } as Partial<Block>);
         callbacks.renderCanvas();
-        console.log(btn.buttonStyles);
+        italicBtn.classList.toggle('active');
       });
     }
 
@@ -130,7 +130,7 @@ export const buttonHandler: BlockHandler = {
         btn.buttonStyles.textDecoration = next;
         callbacks.updateBlock(block.id, { buttonStyles: { ...btn.buttonStyles, textDecoration: next } } as Partial<Block>);
         callbacks.renderCanvas();
-        console.log(btn.buttonStyles);
+        underlineBtn.classList.toggle('active');
       });
     }
   },
