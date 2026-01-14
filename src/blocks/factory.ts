@@ -27,6 +27,8 @@ export function createTextBlock(overrides?: Partial<TextBlock>): TextBlock {
     type: 'text',
     content: '<p>Enter your text here...</p>',
     placeholder: 'Enter your text here...',
+    hasTypography: true,
+    hasSpacing: true,
     styles: { ...DEFAULT_BLOCK_STYLES },
     ...overrides,
   };
@@ -38,6 +40,8 @@ export function createHeadingBlock(overrides?: Partial<HeadingBlock>): HeadingBl
     type: 'heading',
     content: 'Your Heading',
     level: 2,
+    hasTypography: true,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       fontSize: '24px',
@@ -54,6 +58,8 @@ export function createImageBlock(overrides?: Partial<ImageBlock>): ImageBlock {
     src: '',
     alt: 'Image',
     width: '100%',
+    hasTypography: false,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       textAlign: 'center',
@@ -68,6 +74,8 @@ export function createButtonBlock(overrides?: Partial<ButtonBlock>): ButtonBlock
     type: 'button',
     text: 'Click Here',
     link: '#',
+    hasTypography: true,
+    hasSpacing: true,
     buttonStyles: {
       backgroundColor: '#3b82f6',
       textColor: '#ffffff',
@@ -76,7 +84,7 @@ export function createButtonBlock(overrides?: Partial<ButtonBlock>): ButtonBlock
       paddingY: '12px',
       textDecoration: 'none',
       fontStyle: 'normal',
-      fontWeight: '600',
+      fontWeight: '700',
       borderWidth: '0',
       borderColor: 'transparent',
       fullWidth: false,
@@ -93,6 +101,8 @@ export function createDividerBlock(overrides?: Partial<DividerBlock>): DividerBl
   return {
     id: generateBlockId('divider'),
     type: 'divider',
+    hasTypography: false,
+    hasSpacing: false,
     dividerStyles: {
       style: 'solid',
       color: '#e5e7eb',
@@ -113,6 +123,8 @@ export function createSpacerBlock(overrides?: Partial<SpacerBlock>): SpacerBlock
     id: generateBlockId('spacer'),
     type: 'spacer',
     height: '20px',
+    hasTypography: false,
+    hasSpacing: false,
     styles: {},
     ...overrides,
   };
@@ -123,6 +135,8 @@ export function createColumnBlock(overrides?: Partial<ColumnBlock>): ColumnBlock
     id: generateBlockId('column'),
     type: 'column',
     width: '50%',
+    hasTypography: false,
+    hasSpacing: true,
     children: [],
     styles: {
       paddingTop: '10px',
@@ -156,6 +170,8 @@ export function createColumnsBlock(
     type: 'columns',
     columns,
     gap: '0px',
+    hasTypography: false,
+    hasSpacing: false,
     stackOnMobile: true,
     mobileReverse: false,
     styles: { ...DEFAULT_BLOCK_STYLES },
@@ -177,6 +193,8 @@ export function createSocialBlock(overrides?: Partial<SocialBlock>): SocialBlock
     iconStyle: 'color',
     spacing: '8px',
     alignment: 'center',
+    hasTypography: false,
+    hasSpacing: false,
     styles: { ...DEFAULT_BLOCK_STYLES },
     ...overrides,
   };
@@ -188,6 +206,8 @@ export function createVideoBlock(overrides?: Partial<VideoBlock>): VideoBlock {
     type: 'video',
     videoUrl: '',
     playButtonColor: '#ff0000',
+    hasTypography: false,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       textAlign: 'center',
@@ -202,6 +222,8 @@ export function createHtmlBlock(overrides?: Partial<HtmlBlock>): HtmlBlock {
     type: 'html',
     content: '<!-- Enter your custom HTML here -->',
     styles: { ...DEFAULT_BLOCK_STYLES },
+    hasTypography: false,
+    hasSpacing: false,
     ...overrides,
   };
 }
@@ -217,6 +239,8 @@ export function createMenuBlock(overrides?: Partial<MenuBlock>): MenuBlock {
     ],
     separator: '|',
     layout: 'horizontal',
+    hasTypography: true,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       textAlign: 'center',
@@ -233,6 +257,8 @@ export function createFooterBlock(overrides?: Partial<FooterBlock>): FooterBlock
     showUnsubscribe: true,
     showAddress: true,
     address: '{{ company_address }}',
+    hasTypography: true,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       fontSize: '12px',
@@ -250,6 +276,8 @@ export function createHeaderBlock(overrides?: Partial<HeaderBlock>): HeaderBlock
     preheaderText: '',
     showWebVersion: true,
     webVersionText: 'View in browser',
+    hasTypography: true,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       fontSize: '12px',
@@ -268,6 +296,8 @@ export function createLogoBlock(overrides?: Partial<LogoBlock>): LogoBlock {
     alt: 'Logo',
     width: '150px',
     alignment: 'center',
+    hasTypography: false,
+    hasSpacing: true,
     styles: {
       ...DEFAULT_BLOCK_STYLES,
       paddingTop: '20px',
@@ -287,6 +317,8 @@ export function createListBlock(overrides?: Partial<ListBlock>): ListBlock {
       { id: generateBlockId('list-item'), content: 'List item 3' },
     ],
     listType: 'unordered',
+    hasTypography: true,
+    hasSpacing: true,
     styles: { ...DEFAULT_BLOCK_STYLES },
     ...overrides,
   };
@@ -405,10 +437,10 @@ export const BLOCK_DEFINITIONS = [
     icon: 'list',
     category: 'content' as const,
   },
-  {
-    type: 'html' as BlockType,
-    label: 'Custom HTML',
-    icon: 'code',
-    category: 'content' as const,
-  },
+  // {
+  //   type: 'html' as BlockType,
+  //   label: 'Custom HTML',
+  //   icon: 'code',
+  //   category: 'content' as const,
+  // },
 ];

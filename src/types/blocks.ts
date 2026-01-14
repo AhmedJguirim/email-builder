@@ -24,6 +24,8 @@ export interface BlockBase {
   styles: BlockStyles;
   locked?: boolean;
   hidden?: boolean;
+  hasTypography: boolean;
+  hasSpacing: boolean;
 }
 
 export interface TextBlock extends BlockBase {

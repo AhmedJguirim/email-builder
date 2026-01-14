@@ -1,4 +1,5 @@
 import type { Block, ImageBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const imageHandler: BlockHandler = {
@@ -44,6 +45,12 @@ export const imageHandler: BlockHandler = {
     callbacks: BlockHandlerCallbacks
   ): void {
     if (block.type !== 'image') return;
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
 
     const handlers: Record<string, (value: string) => Partial<Block>> = {
       'img-src': (v) => ({ src: v }),

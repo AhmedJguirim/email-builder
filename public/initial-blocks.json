@@ -5,6 +5,8 @@
     "preheaderText": "",
     "showWebVersion": true,
     "webVersionText": "View in browser",
+    "hasTypography": true,
+    "hasSpacing": true,
     "styles": {
       "paddingTop": "10px",
       "paddingBottom": "10px",
@@ -22,6 +24,8 @@
     "alt": "Company Logo",
     "width": "150px",
     "alignment": "center",
+    "hasTypography": false,
+    "hasSpacing": true,
     "styles": {
       "paddingTop": "30px",
       "paddingBottom": "20px",
@@ -34,6 +38,8 @@
     "type": "heading",
     "content": "Welcome to Our Newsletter",
     "level": 1,
+    "hasTypography": true,
+    "hasSpacing": true,
     "styles": {
       "paddingTop": "20px",
       "paddingBottom": "10px",
@@ -49,6 +55,8 @@
     "id": "text_1",
     "type": "text",
     "content": "<p>Hi {{ first_name }},</p><p>Thank you for subscribing to our newsletter. We're excited to have you on board!</p>",
+    "hasTypography": true,
+    "hasSpacing": true,
     "styles": {
       "paddingTop": "10px",
       "paddingBottom": "20px",
@@ -64,6 +72,8 @@
     "type": "button",
     "text": "Get Started",
     "link": "#",
+    "hasTypography": true,
+    "hasSpacing": true,
     "buttonStyles": {
       "backgroundColor": "#3b82f6",
       "textColor": "#ffffff",
@@ -71,7 +81,7 @@
       "paddingX": "32px",
       "paddingY": "14px",
       "fontSize": "16px",
-      "fontWeight": "600",
+      "fontWeight": "700",
       "borderWidth": "0",
       "borderColor": "transparent",
       "fullWidth": false
@@ -87,6 +97,8 @@
   {
     "id": "divider_1",
     "type": "divider",
+    "hasTypography": false,
+    "hasSpacing": false,
     "dividerStyles": {
       "style": "solid",
       "color": "#e5e7eb",
@@ -103,6 +115,8 @@
   {
     "id": "social_1",
     "type": "social",
+    "hasTypography": false,
+    "hasSpacing": false,
     "links": [
       { "id": "fb_1", "platform": "facebook", "url": "#" },
       { "id": "tw_1", "platform": "twitter", "url": "#" },
@@ -123,6 +137,8 @@
   {
     "id": "footer_1",
     "type": "footer",
+    "hasTypography": true,
+    "hasSpacing": true,
     "content": "© {{ current_year }} {{ company_name }}. All rights reserved.",
     "showUnsubscribe": true,
     "showAddress": true,

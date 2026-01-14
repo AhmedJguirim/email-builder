@@ -575,19 +575,23 @@ export class MailBuilder {
 
       this.attachEmailSettingsListeners(properties as HTMLElement);
     } else {
+      console.log(selectedBlock);
       properties.innerHTML = `
         <div class="properties-section">
           <h3>${selectedBlock.type.charAt(0).toUpperCase() + selectedBlock.type.slice(1)} Settings</h3>
           ${this.renderBlockProperties(selectedBlock)}
         </div>
-        <div class="properties-section">
+        ${selectedBlock.hasSpacing ? `<div class="properties-section">
           <h3>Spacing</h3>
           ${this.renderSpacingProperties(selectedBlock)}
-        </div>
-        <div class="properties-section">
+        </div>` : ''
+        }
+        ${selectedBlock.hasTypography ? `<div class="properties-section">
           <h3>Typography</h3>
           ${this.renderTypographyProperties(selectedBlock)}
-        </div>
+        </div>` : ''}
+
+        
       `;
 
       this.attachBlockPropertyListeners(properties as HTMLElement, selectedBlock);
@@ -1258,6 +1262,11 @@ export class MailBuilder {
         cursor: pointer;
         font-size: 14px;
         line-height: 1;
+      }
+      
+      .btn-small.active {
+        background: #3b82f6;
+        color: #fff;
       }
 
       .btn-danger {
