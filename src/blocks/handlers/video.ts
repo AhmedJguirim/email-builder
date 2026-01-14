@@ -1,4 +1,5 @@
 import type { Block, VideoBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 function extractYouTubeId(url: string): string | null {
@@ -61,6 +62,12 @@ export const videoHandler: BlockHandler = {
       'video-thumbnail': (v) => ({ thumbnailUrl: v }),
       'video-play-color': (v) => ({ playButtonColor: v }),
     };
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
 
     Object.keys(handlers).forEach((id) => {
       const el = properties.querySelector(`#${id}`) as HTMLInputElement;
