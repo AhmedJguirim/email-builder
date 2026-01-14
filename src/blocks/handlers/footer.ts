@@ -1,4 +1,5 @@
 import type { Block, FooterBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const footerHandler: BlockHandler = {
@@ -41,6 +42,15 @@ export const footerHandler: BlockHandler = {
     callbacks: BlockHandlerCallbacks
   ): void {
     if (block.type !== 'footer') return;
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
+    addStyleListener('fontSize', properties, block, callbacks,'#font-size');
+    addStyleListener('color', properties, block, callbacks,'#text-color');
+    addStyleListener('lineHeight', properties, block, callbacks,'#line-height');
 
     const contentTextarea = properties.querySelector('#footer-content') as HTMLTextAreaElement;
     if (contentTextarea) {

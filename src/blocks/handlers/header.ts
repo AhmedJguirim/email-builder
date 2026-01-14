@@ -1,4 +1,5 @@
 import type { Block, HeaderBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const headerHandler: BlockHandler = {
@@ -35,6 +36,15 @@ export const headerHandler: BlockHandler = {
     callbacks: BlockHandlerCallbacks
   ): void {
     if (block.type !== 'header') return;
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
+    addStyleListener('fontSize', properties, block, callbacks,'#font-size');
+    addStyleListener('color', properties, block, callbacks,'#text-color');
+    addStyleListener('lineHeight', properties, block, callbacks,'#line-height');
 
     const preheaderInput = properties.querySelector('#header-preheader') as HTMLInputElement;
     if (preheaderInput) {

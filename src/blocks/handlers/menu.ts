@@ -1,4 +1,5 @@
 import type { Block, MenuBlock, MenuItem } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const menuHandler: BlockHandler = {
@@ -46,6 +47,15 @@ export const menuHandler: BlockHandler = {
   ): void {
     if (block.type !== 'menu') return;
     const menu = block as MenuBlock;
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
+    addStyleListener('fontSize', properties, block, callbacks,'#font-size');
+    addStyleListener('color', properties, block, callbacks,'#text-color');
+    addStyleListener('lineHeight', properties, block, callbacks,'#line-height');
 
     const simpleHandlers: Record<string, (value: string) => Partial<Block>> = {
       'menu-layout': (v) => ({ layout: v as 'horizontal' | 'vertical' }),

@@ -1,4 +1,5 @@
 import type { Block, LogoBlock } from '../../types/blocks';
+import { addStyleListener } from '../helpers';
 import type { BlockHandler, BlockHandlerCallbacks } from './types';
 
 export const logoHandler: BlockHandler = {
@@ -51,6 +52,12 @@ export const logoHandler: BlockHandler = {
     callbacks: BlockHandlerCallbacks
   ): void {
     if (block.type !== 'logo') return;
+
+    addStyleListener('backgroundColor', properties, block, callbacks,'#block-bg-color');
+    addStyleListener('paddingLeft', properties, block, callbacks,'#padding-left');
+    addStyleListener('paddingRight', properties, block, callbacks,'#padding-right');
+    addStyleListener('paddingTop', properties, block, callbacks,'#padding-top');
+    addStyleListener('paddingBottom', properties, block, callbacks,'#padding-bottom');
 
     const handlers: Record<string, (value: string) => Partial<Block>> = {
       'logo-src': (v) => ({ src: v }),
