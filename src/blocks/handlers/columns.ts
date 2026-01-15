@@ -28,18 +28,6 @@ export const columnsHandler: BlockHandler = {
         <input type="text" id="columns-gap" value="${columns.gap}" />
       </div>
       <div class="property-group">
-        <label>
-          <input type="checkbox" id="columns-stack-mobile" ${columns.stackOnMobile ? 'checked' : ''} />
-          Stack on Mobile
-        </label>
-      </div>
-      <div class="property-group">
-        <label>
-          <input type="checkbox" id="columns-reverse-mobile" ${columns.mobileReverse ? 'checked' : ''} />
-          Reverse Order on Mobile
-        </label>
-      </div>
-      <div class="property-group">
         <label>Column Widths</label>
         ${columns.columns.map((col, idx) => `
           <div style="margin-bottom: 4px;">
@@ -63,22 +51,6 @@ export const columnsHandler: BlockHandler = {
     if (gapInput) {
       gapInput.addEventListener('change', () => {
         callbacks.updateBlock(block.id, { gap: gapInput.value } as Partial<Block>);
-        callbacks.renderCanvas();
-      });
-    }
-
-    const stackCheckbox = properties.querySelector('#columns-stack-mobile') as HTMLInputElement;
-    if (stackCheckbox) {
-      stackCheckbox.addEventListener('change', () => {
-        callbacks.updateBlock(block.id, { stackOnMobile: stackCheckbox.checked } as Partial<Block>);
-        callbacks.renderCanvas();
-      });
-    }
-
-    const reverseCheckbox = properties.querySelector('#columns-reverse-mobile') as HTMLInputElement;
-    if (reverseCheckbox) {
-      reverseCheckbox.addEventListener('change', () => {
-        callbacks.updateBlock(block.id, { mobileReverse: reverseCheckbox.checked } as Partial<Block>);
         callbacks.renderCanvas();
       });
     }

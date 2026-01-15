@@ -235,7 +235,7 @@ export class EmailRenderer {
           .join('');
 
         return `
-          <td class="${block.stackOnMobile ? 'stack-column' : ''}" style="${columnStyles} border-collapse: collapse;">
+          <td style="${columnStyles} border-collapse: collapse;">
             <table style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;" border="0" cellpadding="0" cellspacing="0" width="100%">
               ${childrenHtml}
             </table>

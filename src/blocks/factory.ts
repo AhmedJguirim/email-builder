@@ -172,8 +172,6 @@ export function createColumnsBlock(
     gap: '0px',
     hasTypography: false,
     hasSpacing: false,
-    stackOnMobile: true,
-    mobileReverse: false,
     styles: { ...DEFAULT_BLOCK_STYLES },
     ...overrides,
   };

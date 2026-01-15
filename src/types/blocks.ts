@@ -93,8 +93,6 @@ export interface ColumnsBlock extends BlockBase {
   type: 'columns';
   columns: ColumnBlock[];
   gap: string;
-  stackOnMobile: boolean;
-  mobileReverse: boolean;
 }
 
 export interface SocialLink {
